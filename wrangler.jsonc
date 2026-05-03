@@ -12,3 +12,14 @@
     "nodejs_compat"
   ]
 }
+{
+  "name": "WEBSITES",
+  "main": "index.ts",
+  "compatibility_date": "2026-05-03",
+  "kv_namespaces": [
+    {
+      "binding": "WEBSITES",
+      "id": "7d49a64f6d5cf68517a90e1bc14811c8"
+    }
+  ]
+}
