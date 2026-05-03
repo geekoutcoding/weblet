@@ -1,13 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Weblet</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Weblet Studio</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div id="app"></div>
+<div class="container">
+  <h1>Weblet Studio ⚡</h1>
+  <p>Create your own site: <b>name.weblet.xyz</b></p>
+
+  <input id="name" placeholder="site name (e.g. peepee)" />
+
+  <div class="editor">
+    <textarea id="html"><h1>Hello Weblet 🚀</h1></textarea>
+    <textarea id="css">body { font-family: Arial; }</textarea>
+    <textarea id="js">console.log("hello")</textarea>
+  </div>
+
+  <button id="publish">Publish Site</button>
+
+  <p id="result"></p>
+</div>
 
 <script src="app.js"></script>
 </body>
