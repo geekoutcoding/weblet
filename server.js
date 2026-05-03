@@ -3,34 +3,47 @@ const path = require("path");
 
 const app = express();
 
-app.use(express.json());
-app.use(express.static("public"));
+// serve frontend files
+app.use(express.static(path.join(__dirname, "public")));
 
-// Detect subdomain
+// helper: get subdomain
 function getSubdomain(host) {
-    let parts = host.split(".");
+    if (!host) return null;
+
+    host = host.split(":")[0]; // remove port
+    const parts = host.split(".");
+
     if (parts.length < 3) return null;
+
     return parts[0];
 }
 
-// Handle subdomains
-app.get("*", (req, res, next) => {
-    let host = req.headers.host;
+// main handler
+app.get("*", (req, res) => {
+    const host = (req.headers.host || "").split(":")[0];
 
-    // MAIN DOMAIN → load frontend
-    if (host === "weblet.xyz" || host.startsWith("www.")) {
+    // MAIN DOMAIN
+    if (host === "weblet.xyz" || host === "www.weblet.xyz") {
         return res.sendFile(path.join(__dirname, "public", "index.html"));
     }
 
-    let sub = getSubdomain(host);
+    // SUBDOMAIN
+    const sub = getSubdomain(host);
 
     if (sub) {
-        // TEMP: show subdomain works
-        return res.send(`<h1>${sub}.weblet.xyz is working 🚀</h1>`);
+        return res.send(`
+            <h1 style="font-family:sans-serif;text-align:center;margin-top:20%">
+                ${sub}.weblet.xyz is working 🚀
+            </h1>
+        `);
     }
 
-    next();
+    // fallback
+    res.status(404).send("Not found");
 });
 
+// start server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Running"));
+app.listen(PORT, () => {
+    console.log("Server running on port " + PORT);
+});
