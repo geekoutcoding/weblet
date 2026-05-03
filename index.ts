@@ -1,23 +1,27 @@
 export default {
-  async fetch(request, env, ctx) {
-    // write a key-value pair
-    await env.KV.put('KEY', 'VALUE');
+  async fetch(request, env) {
+    const url = new URL(request.url);
 
-    // read a key-value pair
-    const value = await env.KV.get('KEY');
+    // CREATE SITE
+    if (url.pathname === "/api/create" && request.method === "POST") {
+      const { name, html } = await request.json();
 
-    // list all key-value pairs
-    const allKeys = await env.KV.list();
+      if (!name || !html) {
+        return new Response("Missing name or html", { status: 400 });
+      }
 
-    // delete a key-value pair
-    await env.KV.delete('KEY');
+      const safeName = name.toLowerCase().replace(/[^a-z0-9-]/g, "");
 
-    // return a Workers response
-    return new Response(
-      JSON.stringify({
-        value: value,
-        allKeys: allKeys,
-      }),
-    );
-  } 
-}
+      const existing = await env.WEBSITES.get(`${safeName}/index.html`);
+      if (existing) {
+        return new Response("Subdomain taken", { status: 409 });
+      }
+
+      await env.WEBSITES.put(`${safeName}/index.html`, html);
+
+      return new Response(`https://${safeName}.weblet.xyz`);
+    }
+
+    return new Response("Worker running");
+  }
+};
