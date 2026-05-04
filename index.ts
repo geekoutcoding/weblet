@@ -5,7 +5,7 @@ export default {
 
     const ROOT = "weblet.xyz";
 
-    // ---------------- API: CREATE SITE ----------------
+    // ---------------- API ----------------
     if (url.pathname === "/api/create" && request.method === "POST") {
       let data;
 
@@ -25,49 +25,40 @@ export default {
         return new Response("Invalid name", { status: 400 });
       }
 
-      // check if taken
       const exists = await env.WEBSITES.get(`${name}/index.html`);
       if (exists) {
         return new Response("Subdomain taken", { status: 409 });
       }
 
-      // save site
       await env.WEBSITES.put(`${name}/index.html`, html);
 
       return new Response(
-        JSON.stringify({
-          url: `https://${name}.${ROOT}`
-        }),
-        {
-          headers: { "content-type": "application/json" }
-        }
+        JSON.stringify({ url: `https://${name}.${ROOT}` }),
+        { headers: { "content-type": "application/json" } }
       );
     }
 
-    // ---------------- SERVE SUBDOMAIN SITES ----------------
-    let sub: string | null = null;
+    // ---------------- SUBDOMAIN ----------------
+    if (host.endsWith(`.${ROOT}`)) {
+      const sub = host.replace(`.${ROOT}`, "").split(".")[0];
 
-    if (host.endsWith(ROOT)) {
-      const withoutRoot = host.replace(`.${ROOT}`, "");
-      if (withoutRoot !== ROOT) {
-        const parts = withoutRoot.split(".");
-        sub = parts[0];
+      if (sub && sub !== "www") {
+        const html = await env.WEBSITES.get(`${sub}/index.html`);
+
+        if (html) {
+          return new Response(html, {
+            headers: { "content-type": "text/html" }
+          });
+        }
+
+        return new Response("Site not found", { status: 404 });
       }
     }
 
-    if (sub && sub !== "weblet" && sub !== "") {
-      const html = await env.WEBSITES.get(`${sub}/index.html`);
+    // ---------------- MAIN SITE ----------------
+    // THIS is what you were missing
+    // serve your frontend files
 
-      if (html) {
-        return new Response(html, {
-          headers: { "content-type": "text/html" }
-        });
-      }
-
-      return new Response("Site not found", { status: 404 });
-    }
-
-    // ---------------- ROOT (your main site) ----------------
-    return new Response("Weblet running 🚀");
+    return fetch(request); // let Pages/static handle it
   }
 };
