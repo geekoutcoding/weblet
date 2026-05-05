@@ -6,6 +6,7 @@ export default {
     const ROOT = "weblet.xyz";
 
     // ---------------- API ----------------
+    return new Response("WORKER HIT");
     if (url.pathname === "/api/create" && request.method === "POST") {
       let data;
 
